@@ -36,6 +36,7 @@ Instance layer → projects, logs, personal decisions (your private fork)
 - No persistent memory between sessions — markdown is loaded each time
 - No web interface — requires technical knowledge (git, Claude, MCP)
 - System ↔ instance sync is manual
+- Instance ↔ system contract is undefined (see [RFC-001](./rfcs/RFC-001-instance-contract.md))
 
 ---
 
@@ -49,6 +50,7 @@ What changes:
   - Each migration is reviewed and generalized — no bulk dumps
   - /examples populated with real anonymized projects
   - Sync mechanism between private instances and this repo defined and tested
+  - RFC-001 (Instance Contract) resolved before v3.0.0 begins
 ```
 
 ### v3.0.0 — Orion OS web interface
@@ -103,12 +105,23 @@ v3.0.0 assumptions. The framework grows from use, not from speculation.
 
 3. **Sync mechanism between this repo and private instances?**
    Cherry-pick, GitHub Action, subtree? Deferred until usage shows the pattern.
+   *(Downstream of RFC-001 — needs the contract first.)*
 
 4. **What does a "skill" look like in the web product?**
    Marketplace, user-defined, auto-detected from stack?
 
 5. **Onboarding for non-technical founders?**
    How short can the path from signup to first commit be?
+
+6. **Migration order for v2.x?**
+   Current proposal: agents → templates → workflows → skills → examples.
+   Least-opinionated first, so the genericization pattern is discovered
+   before tackling the hardest cases.
+
+7. **Instance ↔ system contract?** ← *open since v2.0.0, blocks v3.0.0*
+   Fork, consumer, or hybrid model? How does an instance declare its
+   system version? What happens when the system layer evolves?
+   See [RFC-001 — Instance Contract](./rfcs/RFC-001-instance-contract.md).
 
 ---
 

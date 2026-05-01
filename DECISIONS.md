@@ -1,0 +1,237 @@
+# DECISIONS.md — Orion OS Universal
+
+> Decisions that apply to **every project** built with Orion OS.
+> Project-specific decisions live in your instance repo as `projects/<project>-decisions.md`.
+
+---
+
+## 1. TEAM AND ROLES
+
+**D1. The founder is the sole business decision maker.**
+
+**D2. Orion acts as technical architect and coordinator.**
+
+**D3. Agents have specialized roles — they execute, not decide.**
+
+**D4. The founder always tests before an issue is closed.**
+
+---
+
+## 2. WORKFLOW
+
+**D5. All issues for a project live in a single repo (typically the backend repo).**
+
+**D6. Each issue includes: context + agent prompt + test plan.**
+
+**D7. Maximum 2 issues In Progress simultaneously per project.**
+
+**D8. When Orion says "we'll do that later", an issue is created immediately.**
+
+**D9. When the founder proposes an idea, Orion analyzes it technically before creating the issue.**
+
+**D52. Commits use `ref #XX` — never `closes #XX` or `fixes #XX`.**
+
+**D53. Orion closes issues — they are never closed automatically.**
+
+**D55. Configuration or documentation changes — the founder receives them with `git pull`.**
+
+**D56. The founder gives the green light before Orion uses any MCP on application repos.**
+
+**D87. Session close protocol — Orion updates `projects/<project>.md` at the end of every session.**
+Shows diff to the founder before push. Source of truth for project state.
+
+---
+
+## 3. GIT AND BRANCHES
+
+**D10. `develop` is the active working branch. `main` is production.**
+
+**D11. `main` is NOT touched — except via planned PR.**
+
+**D12. All team members do `git pull origin develop` before starting work.**
+
+**D14. Orion can push to `develop` for:** config, docs, urgent fixes decided with the founder, Orion OS files.
+
+**D74. Branch protection on `main`.** No direct push. The founder is the sole merger.
+
+---
+
+## 4. PRODUCTION DEPLOYS
+
+**D49. Production deploys via planned PR.**
+
+**D51. Orion NEVER changes `main` outside of a deploy PR.**
+
+---
+
+## 5. SECURITY
+
+**D35. Never commit credentials, tokens, or secrets.**
+
+**D36. Never use `any` in TypeScript without justification.**
+
+**D37. Never break DTO/API contracts the frontend consumes.**
+
+**D73. `ignore-scripts=true` in `.npmrc` in all projects.**
+
+---
+
+## 6. TOOLS AND MCPS
+
+**D38. GitHub MCP connected to Claude for Orion.**
+
+**D68. Agents read issue body only via MCP — corrections go in body, not comments.**
+Reason: at the time of writing, the GitHub MCP reads PR comments but not issue
+comments reliably. Once GitHub fixes this, the rule becomes: agents read body +
+comments, with comments treated as authoritative corrections to the body.
+Until then, the founder edits the issue body directly when correcting an agent.
+
+**D82. GitHub MCP tool rules:**
+
+| Tool | Use for |
+|------|---------|
+| `create_or_update_file` | Files in repo filesystem |
+| `update_issue` | Issue body, title, state |
+| `create_issue` | New issue |
+| `push_files` | Multiple files, single commit |
+
+---
+
+## 7. AGENTS AND MODELS
+
+**D54. Scale model size when:** codebase exceeds context window or smaller model fails twice.
+
+**D63. Lighter models for S/M tasks, larger models for L/XL tasks.**
+
+**D64. The value is in the context, not the model.**
+
+**D66. Model by complexity:**
+
+| Task | Model tier |
+|------|-----------|
+| Mechanical refactor | Smallest available |
+| Bug analysis / features | Mid-tier |
+| Architecture | Mid-tier or large |
+| Global decisions | Largest available (Orion's tier) |
+
+---
+
+## 8. ORION OS STRUCTURE
+
+**D60. ORION.md lives in the instance repo — not in app repos.**
+
+**D61. CLAUDE.md in each project repo = how to work (≤150 lines).**
+
+**D65. Subagents live in `agents/subagents/` — reusable across projects.**
+
+**D81. Orion asks the founder before any direct code change to application repos.**
+
+---
+
+## 9. ENGINEERING PRINCIPLES
+
+**D77.** ① Measure before optimizing. ② Never guess the bottleneck. ③ Avoid unnecessary complexity. ④ Simple fails less. ⑤ Data > algorithm.
+
+---
+
+## 10. DECISION FRAMEWORK
+
+**D78.** Scalable by default. Pragmatic when there is a real deadline. Never silent about the tradeoff.
+
+**D89. Every technical decision must be reversible or explicitly documented as irreversible.**
+Reason: Orion OS is evolving toward a web product (v3.0.0). Decisions that block that evolution
+must be flagged and justified. When two options exist, always prefer the one that doesn't
+close doors for the future interface.
+
+---
+
+## 11. MULTI-PROJECT
+
+**D88. Multi-project rules:**
+
+1. **Each project is fully isolated:** own project.md, own decisions file, own repos, own issues.
+2. **D7 applies per project:** max 2 in-progress per project, not global.
+3. **Context switch is explicit:** Orion saves state before switching (see `workflows/context-switch.md`).
+4. **Decisions go to the right file:** universal → DECISIONS.md (this repo), project-specific → instance `projects/<n>-decisions.md`.
+5. **Agents re-bootstrap on project switch:** they must re-read CLAUDE.md from the new repo.
+6. **Cross-project decisions are rare:** if one is needed, document in DECISIONS.md and note in both project files.
+7. **New projects use the init workflow:** `workflows/project-init.md` + templates. No ad-hoc setup.
+8. **Primary project:** the project Orion loads by default at session start. Configurable per instance.
+
+---
+
+## 12. SCAFFOLD AND EXECUTION
+
+**D90. Orion creates project scaffolds via GitHub MCP — never assumes local terminal access.**
+Reason: the workflow must scale to the v3.0.0 web interface where no terminal exists.
+Orion pushes all source files to the repo. The founder clones and runs `npm install` locally.
+This is the only reversible flow — it maps 1:1 to a future "Setup" button in the web UI.
+
+Local AI tools (Claude Code, Cursor, etc.) can be used by the founder to accelerate
+local work, but they are never the required path for a workflow to function. If a
+workflow only works with a specific local tool, it is not a valid Orion OS workflow.
+
+---
+
+## 13. DOCUMENTATION
+
+**D91. Instance HOW-TO-USE.md is a living document — updated by Orion at every version bump.**
+Triggered by: new Orion OS version, new/removed project, command changes, workflow changes.
+Orion owns this file. The founder never edits it manually.
+Every update includes a Changelog entry + footer version bump, pushed in the same commit
+as the version change.
+
+---
+
+## 14. CODE QUALITY ENFORCEMENT
+
+**D92. Three-layer quality strategy:**
+
+### Layer 1 — Agents (prevention, before commit)
+- IDE-level static analysis required in agent bootstrap.
+- Inline issue detection while writing code.
+- Goal: zero quality-gate issues reach CI.
+
+### Layer 2 — CI (enforcement, on PR)
+- Quality scan on every PR to staging and main.
+- Quality Gate must pass before merge.
+- If Quality Gate fails → fix in `develop`, never skip or bypass.
+
+### Layer 3 — Orion (deploy-only coordination)
+- Orion does NOT use quality MCPs during normal development.
+- Orion's role is limited to **critical deploy moments**: when Quality Gate
+  blocks a release and Orion must triage which issues to fix vs. temporarily
+  exclude with justification.
+- Orion never excludes files from coverage without creating a follow-up issue with tests.
+- Orion never marks a Hotspot as "Safe" without confirming with the founder.
+
+### Issue assignment rule
+- Frontend issues → frontend agent
+- Backend issues → backend agent
+- Orion triages ambiguous cases
+
+---
+
+## 15. SECURITY INCIDENTS
+
+**D93. Security incident response — structured protocol for third-party provider breaches.**
+Full protocol: `workflows/security-incident.md`
+
+Key rules:
+- Rotate credentials at SOURCE first, then update provider env vars.
+- Rotation order: GitHub tokens → OAuth secrets → JWT secrets → DB credentials → email keys → AI API keys.
+- Every incident is logged in instance `logs/post-mortems.jsonl`.
+- All env vars containing secrets must be marked as `sensitive` in the deploy provider.
+- Env vars NOT marked sensitive are treated as potentially exposed in any breach.
+
+---
+
+## 16. FUTURE
+
+**D40. Orion as multi-project architect.** ✅ Active.
+
+**D43. CI/CD + quality gate is standard for all projects.**
+
+---
+
+*Orion OS v2.0.0 — universal decisions, public system layer.*
